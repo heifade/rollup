@@ -270,7 +270,7 @@ describe('hooks', () => {
 			})
 			.then(({ output }) => {
 				assert.equal(output[1].isAsset, true);
-				assert.equal(output[1].fileName, 'assets/test-19916f7d.ext')
+				assert.equal(output[1].fileName, 'assets/test-19916f7d.ext');
 				assert.equal(output[1].source, 'hello world');
 				assert.equal(output[0].fileName, 'input.js');
 				assert.equal(output[0].isEntry, true);
@@ -283,7 +283,6 @@ describe('hooks', () => {
 		return rollup
 			.rollup({
 				input: 'input',
-				experimentalCodeSplitting: true,
 				plugins: [
 					loader({ input: '' }),
 					{
@@ -305,19 +304,19 @@ describe('hooks', () => {
 					`var input = new URL('../assets/test-19916f7d.ext', import.meta.url).href;\n\nexport default input;\n`
 				);
 
-				return rollup.rollup({
-					cache,
-					input: 'input',
-					experimentalCodeSplitting: true,
-					plugins: [
-						loader({ input: '' }),
-						{
-							transform() {
-								assert.fail('Should cache transform');
+				return rollup
+					.rollup({
+						cache,
+						input: 'input',
+						plugins: [
+							loader({ input: '' }),
+							{
+								transform() {
+									assert.fail('Should cache transform');
+								}
 							}
-						}
-					]
-				});
+						]
+					});
 			})
 			.then(bundle => {
 				return bundle.generate({ format: 'es' });
@@ -337,7 +336,6 @@ describe('hooks', () => {
 		return rollup
 			.rollup({
 				input: 'input',
-				experimentalCodeSplitting: true,
 				plugins: [
 					loader({ input: '' }),
 					{
@@ -362,21 +360,21 @@ describe('hooks', () => {
 					`var input = new URL('../assets/test-19916f7d.ext', import.meta.url).href;\n\nexport default input;\n`
 				);
 
-				return rollup.rollup({
-					cache,
-					input: 'input',
-					experimentalCodeSplitting: true,
-					plugins: [
-						loader({ input: '' }),
-						{
-							name: 'x',
-							transform() {
-								runs++;
-								return `alert('hello world')`;
+				return rollup
+					.rollup({
+						cache,
+						input: 'input',
+						plugins: [
+							loader({ input: '' }),
+							{
+								name: 'x',
+								transform() {
+									runs++;
+									return `alert('hello world')`;
+								}
 							}
-						}
-					]
-				});
+						]
+					});
 			})
 			.then(bundle => {
 				return bundle.generate({ format: 'es' });
@@ -556,7 +554,6 @@ module.exports = input;
 		return rollup
 			.rollup({
 				input: 'input',
-				experimentalCodeSplitting: true,
 				plugins: [
 					loader({ input: `alert('hello')` }),
 					{
