@@ -93,11 +93,13 @@ runTestSuiteWithSamples('function', path.resolve(__dirname, 'samples'), (dir, co
 								(config.options || {}).output || {}
 							)
 						)
-						.then(generated => {
+						.then(({ output: [code] }) => {
 							if (config.generateError) {
 								unintendedError = new Error('Expected an error while generating output');
 							}
-							result = generated;
+
+							// TODO fix, result = output?
+							result = code;
 						})
 						.catch(err => {
 							if (config.generateError) {

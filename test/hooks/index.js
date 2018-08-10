@@ -298,11 +298,9 @@ describe('hooks', () => {
 				return bundle.generate({ format: 'es' });
 			})
 			.then(({ output }) => {
-				assert.equal(output['assets/test-19916f7d.ext'], 'hello world');
-				assert.equal(
-					output['input.js'].code,
-					`var input = new URL('../assets/test-19916f7d.ext', import.meta.url).href;\n\nexport default input;\n`
-				);
+				assert.equal(output[0].code, `var input = new URL('../assets/test-19916f7d.ext', import.meta.url).href;\n\nexport default input;\n`);
+				assert.equal(output[1].fileName, 'assets/test-19916f7d.ext');
+				assert.equal(output[1].source, 'hello world');
 
 				return rollup
 					.rollup({
@@ -322,11 +320,9 @@ describe('hooks', () => {
 				return bundle.generate({ format: 'es' });
 			})
 			.then(({ output }) => {
-				assert.equal(output['assets/test-19916f7d.ext'], 'hello world');
-				assert.equal(
-					output['input.js'].code,
-					`var input = new URL('../assets/test-19916f7d.ext', import.meta.url).href;\n\nexport default input;\n`
-				);
+				assert.equal(output[0].code, `var input = new URL('../assets/test-19916f7d.ext', import.meta.url).href;\n\nexport default input;\n`);
+				assert.equal(output[1].fileName, 'assets/test-19916f7d.ext');
+				assert.equal(output[1].source, 'hello world');
 			});
 	});
 
@@ -354,11 +350,9 @@ describe('hooks', () => {
 				return bundle.generate({ format: 'es' });
 			})
 			.then(({ output }) => {
-				assert.equal(output['assets/test-19916f7d.ext'], 'hello world');
-				assert.equal(
-					output['input.js'].code,
-					`var input = new URL('../assets/test-19916f7d.ext', import.meta.url).href;\n\nexport default input;\n`
-				);
+				assert.equal(output[0].code, `var input = new URL('../assets/test-19916f7d.ext', import.meta.url).href;\n\nexport default input;\n`);
+				assert.equal(output[1].fileName, 'assets/test-19916f7d.ext');
+				assert.equal(output[1].source, 'hello world');
 
 				return rollup
 					.rollup({
@@ -381,8 +375,8 @@ describe('hooks', () => {
 			})
 			.then(({ output }) => {
 				assert.equal(runs, 2);
-				assert.equal(output['assets/test-19916f7d.ext'], undefined);
-				assert.equal(output['input.js'].code.trim(), `alert('hello world');`);
+				assert.equal(output[0].code.trim(), `alert('hello world');`);
+				assert.equal(output.length, 1);
 			});
 	});
 
@@ -518,7 +512,7 @@ module.exports = input;
 				return bundle.generate({ format: 'es' });
 			})
 			.then(({ output: [,output] }) => {
-				assert.equal(output['assets/test-19916f7d.ext'], 'hello world');
+				assert.equal(output.source, 'hello world');
 				assert.equal(thrown, true);
 			});
 	});
@@ -681,7 +675,6 @@ module.exports = input;
 		return rollup
 			.rollup({
 				input: 'input',
-				experimentalCodeSplitting: true,
 				plugins: [
 					loader({ input: `alert('hello')` }),
 					{
@@ -974,8 +967,8 @@ module.exports = input;
 					format: 'es'
 				});
 			})
-			.then(bundle => {
-				assert.equal(bundle.code.trim(), `alert('hello');`);
+			.then(({ output }) => {
+				assert.equal(output[0].code.trim(), `alert('hello');`);
 			});
 	});
 
