@@ -81,7 +81,7 @@ export default command => {
 			external: ['fs', 'path', 'events', 'module', 'util', 'crypto'],
 			output: [
 				{ file: 'dist/rollup.js', format: 'cjs', sourcemap: true, banner },
-				{ file: 'dist/rollup.es.js', format: 'es', sourcemap: true, banner }
+				{ file: 'dist/rollup.es.js', format: 'esm', sourcemap: true, banner }
 			]
 		},
 		/* Rollup CLI */
