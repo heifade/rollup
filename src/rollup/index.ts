@@ -4,7 +4,6 @@ import Graph from '../Graph';
 import { createAddons } from '../utils/addons';
 import { createAssetPluginHooks, finaliseAsset } from '../utils/assetHooks';
 import commondir from '../utils/commondir';
-import { Deprecation } from '../utils/deprecateOptions';
 import error from '../utils/error';
 import { writeFile } from '../utils/fs';
 import getExportMode from '../utils/getExportMode';
@@ -20,28 +19,8 @@ import {
 	OutputOptions,
 	Plugin,
 	RollupBuild,
-	RollupOutput,
-	WarningHandler
+	RollupOutput
 } from './types';
-
-function addDeprecations(deprecations: Deprecation[], warn: WarningHandler) {
-	const message = `The following options have been renamed — please update your config: ${deprecations
-		.map(option => `${option.old} -> ${option.new}`)
-		.join(', ')}`;
-	warn({
-		code: 'DEPRECATED_OPTIONS',
-		message,
-		deprecations
-	});
-}
-
-function checkInputOptions(options: InputOptions) {
-	if (options.transform || options.load || options.resolveId || options.resolveExternal) {
-		throw new Error(
-			'The `transform`, `load`, `resolveId` and `resolveExternal` options are deprecated in favour of a unified plugin API. See "https://rollupjs.org/guide/en#plugins" for details'
-		);
-	}
-}
 
 function checkOutputOptions(options: OutputOptions) {
 	if (<string>options.format === 'es6') {
@@ -56,10 +35,6 @@ function checkOutputOptions(options: OutputOptions) {
 			message: `You must specify output.format, which can be one of 'amd', 'cjs', 'system', 'esm', 'iife' or 'umd'`,
 			url: `https://rollupjs.org/guide/en#output-format-f-format`
 		});
-	}
-
-	if (options.moduleId) {
-		if (options.amd) throw new Error('Cannot have both output.amd and output.moduleId');
 	}
 }
 
@@ -79,15 +54,13 @@ function getInputOptions(rawInputOptions: GenericConfigObject): any {
 	if (!rawInputOptions) {
 		throw new Error('You must supply an options object to rollup');
 	}
-	let { inputOptions, deprecations, optionError } = mergeOptions({
+	let { inputOptions, optionError } = mergeOptions({
 		config: rawInputOptions,
 		deprecateConfig: { input: true }
 	});
 
 	if (optionError) inputOptions.onwarn({ message: optionError, code: 'UNKNOWN_OPTION' });
-	if (deprecations.length) addDeprecations(deprecations, inputOptions.onwarn);
 
-	checkInputOptions(inputOptions);
 	const plugins = inputOptions.plugins;
 	inputOptions.plugins = Array.isArray(plugins)
 		? plugins.filter(Boolean)
@@ -464,9 +437,7 @@ function normalizeOutputOptions(
 
 	// now outputOptions is an array, but rollup.rollup API doesn't support arrays
 	const outputOptions = mergedOptions.outputOptions[0];
-	const deprecations = mergedOptions.deprecations;
 
-	if (deprecations.length) addDeprecations(deprecations, inputOptions.onwarn);
 	checkOutputOptions(outputOptions);
 
 	if (typeof outputOptions.file === 'string') {
