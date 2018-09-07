@@ -55,8 +55,7 @@ function getInputOptions(rawInputOptions: GenericConfigObject): any {
 		throw new Error('You must supply an options object to rollup');
 	}
 	let { inputOptions, optionError } = mergeOptions({
-		config: rawInputOptions,
-		deprecateConfig: { input: true }
+		config: rawInputOptions
 	});
 
 	if (optionError) inputOptions.onwarn({ message: optionError, code: 'UNKNOWN_OPTION' });
@@ -421,16 +420,10 @@ function normalizeOutputOptions(
 	if (!rawOutputOptions) {
 		throw new Error('You must supply an options object');
 	}
-	// since deprecateOptions, adds the output properties
-	// to `inputOptions` so adding that lastly
-	const consolidatedOutputOptions = {
-		output: { ...rawOutputOptions, ...rawOutputOptions.output, ...inputOptions.output }
-	};
 	const mergedOptions = mergeOptions({
-		// just for backward compatiblity to fallback on root
-		// if the option isn't present in `output`
-		config: consolidatedOutputOptions,
-		deprecateConfig: { output: true }
+		config: {
+			output: { ...rawOutputOptions, ...rawOutputOptions.output, ...inputOptions.output }
+		}
 	});
 
 	if (mergedOptions.optionError) throw new Error(mergedOptions.optionError);

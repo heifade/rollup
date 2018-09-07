@@ -91,7 +91,7 @@ export function createPluginDriver(
 
 		const firstWatchHandler = true;
 
-		function deprecatedWatchListener(event: string, handler: () => void) {
+		function deprecatedWatchListener(event: string, handler: () => void): EventEmitter {
 			if (firstWatchHandler)
 				context.warn({
 					code: 'PLUGIN_WATCHER_DEPRECATED',
@@ -135,7 +135,7 @@ export function createPluginDriver(
 			},
 			watcher: watcher
 				? <EventEmitter>{
-						...watcher,
+						...(<EventEmitter>watcher),
 						on: deprecatedWatchListener,
 						addListener: deprecatedWatchListener
 				  }
