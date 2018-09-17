@@ -2,7 +2,6 @@ import * as acorn from 'acorn';
 import injectDynamicImportPlugin from 'acorn-dynamic-import/lib/inject';
 import injectImportMeta from 'acorn-import-meta/inject';
 import { Program } from 'estree';
-import { EventEmitter } from 'events';
 import GlobalScope from './ast/scopes/GlobalScope';
 import { EntityPathTracker } from './ast/utils/EntityPathTracker';
 import GlobalVariable from './ast/variables/GlobalVariable';
@@ -17,6 +16,7 @@ import {
 	OutputBundle,
 	RollupCache,
 	RollupWarning,
+	RollupWatcher,
 	SerializablePluginCache,
 	SourceDescription,
 	TreeshakingOptions,
@@ -79,7 +79,7 @@ export default class Graph {
 	// deprecated
 	treeshake: boolean;
 
-	constructor(options: InputOptions, watcher?: EventEmitter) {
+	constructor(options: InputOptions, watcher?: RollupWatcher) {
 		this.curChunkIndex = 0;
 		this.deoptimizationTracker = new EntityPathTracker();
 		this.cachedModules = new Map();

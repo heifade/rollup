@@ -41,7 +41,7 @@ export class Watcher {
 		process.nextTick(() => this.run());
 	}
 
-	emit(event: string, value: any) {
+	emit(event: string, value?: any) {
 		this.emitter.emit(event, value);
 	}
 

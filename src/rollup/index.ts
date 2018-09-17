@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import { optimizeChunks } from '../chunk-optimization';
 import Graph from '../Graph';
 import { createAddons } from '../utils/addons';
@@ -19,7 +18,8 @@ import {
 	OutputOptions,
 	Plugin,
 	RollupBuild,
-	RollupOutput
+	RollupOutput,
+	RollupWatcher
 } from './types';
 
 function checkOutputOptions(options: OutputOptions) {
@@ -110,8 +110,8 @@ function getInputOptions(rawInputOptions: GenericConfigObject): any {
 	return inputOptions;
 }
 
-let curWatcher: EventEmitter;
-export function setWatcher(watcher: EventEmitter) {
+let curWatcher: RollupWatcher;
+export function setWatcher(watcher: RollupWatcher) {
 	curWatcher = watcher;
 }
 
