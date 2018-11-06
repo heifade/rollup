@@ -80,6 +80,7 @@ function getInputOptions(rawInputOptions: GenericConfigObject): any {
 	if (!rawInputOptions) {
 		throw new Error('You must supply an options object to rollup');
 	}
+	//
 	let { inputOptions, deprecations, optionError } = mergeOptions({
 		config: rawInputOptions,
 		deprecateConfig: { input: true }

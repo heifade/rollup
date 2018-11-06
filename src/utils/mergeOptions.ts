@@ -80,7 +80,7 @@ export const commandAliases: { [key: string]: string } = {
 };
 
 export default function mergeOptions({
-	config = {},
+	config = {}, // 配置实际转入参数
 	command: rawCommandOptions = {},
 	deprecateConfig,
 	defaultOnWarnHandler
@@ -95,8 +95,11 @@ export default function mergeOptions({
 	deprecations: Deprecation[];
 	optionError: string | null;
 } {
+	// 过时的参数列表，返回如： [ { new: 'input', old: 'entry' } ]
 	const deprecations = deprecate(config, rawCommandOptions, deprecateConfig);
+	// 命令行参数列表
 	const command = getCommandOptions(rawCommandOptions);
+	// 从命令行或配置文件或默认配置里获取参数
 	const inputOptions = getInputOptions(config, command, defaultOnWarnHandler);
 
 	if (command.output) {
