@@ -80,26 +80,35 @@ function getInputOptions(rawInputOptions: GenericConfigObject): any {
 	if (!rawInputOptions) {
 		throw new Error('You must supply an options object to rollup');
 	}
-	//
+	// inputOptions: input 从命令行或配置文件与默认配置合并
+	// deprecations: 过时的参数列表，过时的参数，仍然会写入正确的地方
+	// optionError: 错误信息
 	let { inputOptions, deprecations, optionError } = mergeOptions({
 		config: rawInputOptions,
 		deprecateConfig: { input: true }
 	});
 
+	// 如果存在错误信息，直接输出到终端
 	if (optionError) inputOptions.onwarn({ message: optionError, code: 'UNKNOWN_OPTION' });
+	// 如果存在过时参数，直接输出到终端
 	if (deprecations.length) addDeprecations(deprecations, inputOptions.onwarn);
 
+	// 检查是否存在一些 属性 如 transform 应放到插件里。（应该不会出现这种情况，因为inputOptions不可能会有）
 	checkInputOptions(inputOptions);
+	// 整理插件列表，过滤掉null,undefined等无效的插件，并确保是数组
 	const plugins = inputOptions.plugins;
 	inputOptions.plugins = Array.isArray(plugins)
 		? plugins.filter(Boolean)
 		: plugins
 			? [plugins]
 			: [];
+
+	// 依次调用每个插件的options方法
 	inputOptions = inputOptions.plugins.reduce(applyOptionHook, inputOptions);
 
+	// 实验代码分割,
 	if (!inputOptions.experimentalCodeSplitting) {
-		inputOptions.inlineDynamicImports = true;
+		inputOptions.inlineDynamicImports = true; // 内联动态导入
 		if (inputOptions.manualChunks)
 			error({
 				code: 'INVALID_OPTION',
@@ -117,6 +126,7 @@ function getInputOptions(rawInputOptions: GenericConfigObject): any {
 			});
 	}
 
+	// 内联动态导入
 	if (inputOptions.inlineDynamicImports) {
 		if (inputOptions.manualChunks)
 			error({
@@ -135,6 +145,7 @@ function getInputOptions(rawInputOptions: GenericConfigObject): any {
 				message: 'Multiple inputs are not supported for inlineDynamicImports.'
 			});
 	} else if (inputOptions.experimentalPreserveModules) {
+		// 实验保存模块
 		if (inputOptions.inlineDynamicImports)
 			error({
 				code: 'INVALID_OPTION',
@@ -164,7 +175,9 @@ export default function rollup(
 	rawInputOptions: GenericConfigObject
 ): Promise<RollupSingleFileBuild | RollupBuild> {
 	try {
+		// 从命令行，配置文件，默认配置中获取配置信息，并调用每个插件的options方法
 		const inputOptions = getInputOptions(rawInputOptions);
+		// 当perf为true时，给插件的指定方法注入打印开始时间，结束时间
 		initialiseTimers(inputOptions);
 
 		const graph = new Graph(inputOptions, curWatcher);

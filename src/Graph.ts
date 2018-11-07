@@ -81,7 +81,7 @@ export default class Graph {
 
 	constructor(options: InputOptions, watcher?: Watcher) {
 		this.curChunkIndex = 0;
-		this.deoptimizationTracker = new EntityPathTracker();
+		this.deoptimizationTracker = new EntityPathTracker(); // 去优化跟踪器
 		this.cachedModules = new Map();
 		if (options.cache) {
 			if (options.cache.modules)
@@ -153,6 +153,7 @@ export default class Graph {
 
 		this.shimMissingExports = options.shimMissingExports;
 
+		// 语法树
 		this.scope = new GlobalScope();
 		// TODO strictly speaking, this only applies with non-ES6, non-default-only bundles
 		for (const name of ['module', 'exports', '_interopDefault']) {
@@ -160,8 +161,10 @@ export default class Graph {
 		}
 		this.exportShimVariable = this.scope.findVariable('_missingExportShim');
 
+		// 默认情况下，模块的上下文 - 即顶级的this的值为undefined。在极少数情况下，您可能需要将其更改为其他内容，如 'window'。
 		this.context = String(options.context);
 
+		// 和options.context一样，但是每个模块可以是id: context对的对象，也可以是id => context函数。
 		const optionsModuleContext = options.moduleContext;
 		if (typeof optionsModuleContext === 'function') {
 			this.getModuleContext = id => optionsModuleContext(id) || this.context;
@@ -175,8 +178,9 @@ export default class Graph {
 			this.getModuleContext = () => this.context;
 		}
 
+		// Function 将拦截警告信息。如果没有提供，警告将被复制并打印到控制台
 		this.onwarn = options.onwarn || makeOnwarn();
-
+		// 是否用 const
 		this.varOrConst = options.preferConst ? 'const' : 'var';
 
 		this.acornOptions = options.acorn || {};

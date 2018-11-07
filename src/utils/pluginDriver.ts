@@ -46,12 +46,15 @@ export function createPluginDriver(
 	pluginCache: Record<string, SerializablePluginCache>,
 	watcher?: Watcher
 ): PluginDriver {
+	// 插件列表，在后面添加默认插件(用于读取非外部文件)
 	const plugins = [...(options.plugins || []), getRollupDefaultPlugin(options)];
+	//
 	const { emitAsset, getAssetFileName, setAssetSource } = createAssetPluginHooks(graph.assetsById);
 	const existingPluginKeys: string[] = [];
 
 	let hasLoadersOrTransforms = false;
 
+	// 插件环境数组
 	const pluginContexts = plugins.map(plugin => {
 		let cacheable = true;
 		if (typeof plugin.cacheKey !== 'string') {
@@ -119,6 +122,7 @@ export function createPluginDriver(
 		return context;
 	});
 
+	//
 	function runHookSync<T>(
 		hookName: string,
 		args: any[],
@@ -214,11 +218,13 @@ export function createPluginDriver(
 			return promise;
 		},
 
+		// 顺序执行插件的 hook，hook 为同步方法
 		// chains, ignores returns
 		hookSeqSync(name, args, hookContext) {
 			for (let i = 0; i < plugins.length; i++) runHookSync<void>(name, args, i, false, hookContext);
 		},
 
+		// 顺序执行插件的 hook，直到某个插件的hook返回非null值为止
 		// chains, first non-null result stops and returns
 		hookFirst(name, args, hookContext) {
 			let promise: Promise<any> = Promise.resolve();
@@ -230,6 +236,7 @@ export function createPluginDriver(
 			}
 			return promise;
 		},
+		// 并行执行插件的 hook，hook 为异步方法
 		// parallel, ignores returns
 		hookParallel(name, args, hookContext) {
 			const promises: Promise<void>[] = [];
@@ -240,6 +247,7 @@ export function createPluginDriver(
 			}
 			return Promise.all(promises).then(() => {});
 		},
+		// 顺序执行插件的 hook，直到某个插件的hook返回非null的promise，并回调reduce方法
 		// chains, reduces returns of type R, to type T, handling the reduced value as the first hook argument
 		hookReduceArg0(name, [arg0, ...args], reduce, hookContext) {
 			let promise = Promise.resolve(arg0);
@@ -254,6 +262,7 @@ export function createPluginDriver(
 			}
 			return promise;
 		},
+		// 顺序执行插件的 hook，直到某个插件的hook返回非null的promise，并回调reduce方法
 		// chains, reduces returns of type R, to type T, handling the reduced value separately. permits hooks as values.
 		hookReduceValue(name, initial, args, reduce, hookContext) {
 			let promise = Promise.resolve(initial);

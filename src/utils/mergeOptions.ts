@@ -99,7 +99,7 @@ export default function mergeOptions({
 	const deprecations = deprecate(config, rawCommandOptions, deprecateConfig);
 	// 命令行参数列表
 	const command = getCommandOptions(rawCommandOptions);
-	// 从命令行或配置文件或默认配置里获取参数
+	// 从命令行或配置文件与默认配置合并
 	const inputOptions = getInputOptions(config, command, defaultOnWarnHandler);
 
 	if (command.output) {
@@ -107,52 +107,61 @@ export default function mergeOptions({
 	}
 
 	const output = config.output;
+	// output 放入数组 [output, ]
 	const normalizedOutputOptions = Array.isArray(output) ? output : output ? [output] : [];
+
 	if (normalizedOutputOptions.length === 0) normalizedOutputOptions.push({});
+	// 从命令行或配置文件与默认配置合并, [output, ]
 	const outputOptions = normalizedOutputOptions.map(singleOutputOptions =>
 		getOutputOptions(singleOutputOptions, command)
 	);
 
 	const unknownOptionErrors: string[] = [];
+	// 有效的input配置
 	const validInputOptions = Object.keys(inputOptions);
+	// 找出配置文件里不正确的input配置，组织成错误信息放入 unknownOptionErrors：['Unknown input option:aa, bb. Allowed options:input']
 	addUnknownOptionErrors(
 		unknownOptionErrors,
-		Object.keys(config),
-		validInputOptions,
+		Object.keys(config), // 被检查的数据
+		validInputOptions, // 正确数据
 		'input option',
 		/^output$/
 	);
 
+	// 有效的output配置
 	const validOutputOptions = Object.keys(outputOptions[0]);
+	// 以第一个output为准，检查其它output, 组织成错误信息放入 unknownOptionErrors：['Unknown output option:aa, bb. Allowed options:input']
 	addUnknownOptionErrors(
 		unknownOptionErrors,
-		outputOptions.reduce((allKeys, options) => allKeys.concat(Object.keys(options)), []),
-		validOutputOptions,
+		outputOptions.reduce((allKeys, options) => allKeys.concat(Object.keys(options)), []), // 被检查的数据
+		validOutputOptions, // 正确数据
 		'output option'
 	);
 
 	const validCliOutputOptions = validOutputOptions.filter(
 		option => option !== 'sourcemapPathTransform'
 	);
+
+	// 检查命令行输入是否存在不正确的参数
 	addUnknownOptionErrors(
 		unknownOptionErrors,
-		Object.keys(command),
+		Object.keys(command), // 被检查的数据
 		validInputOptions.concat(
 			validCliOutputOptions,
 			Object.keys(commandAliases),
 			'config',
 			'environment',
 			'silent'
-		),
+		), // 正确数据
 		'CLI flag',
 		/^_|output|(config.*)$/
 	);
 
 	return {
-		inputOptions,
-		outputOptions,
-		deprecations,
-		optionError: unknownOptionErrors.length > 0 ? unknownOptionErrors.join('\n') : null
+		inputOptions, // input 从命令行或配置文件与默认配置合并
+		outputOptions, // output 从命令行或配置文件与默认配置合并
+		deprecations, // 过时的参数列表
+		optionError: unknownOptionErrors.length > 0 ? unknownOptionErrors.join('\n') : null // 错误信息
 	};
 }
 

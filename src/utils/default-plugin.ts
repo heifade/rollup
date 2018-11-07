@@ -55,6 +55,7 @@ function createResolveId(options: InputOptions) {
 
 		// external modules (non-entry modules that start with neither '.' or '/')
 		// are skipped at this stage.
+		// 当资源是 外部引用时 交给其它插件处理
 		if (importer !== undefined && !isAbsolute(importee) && importee[0] !== '.') return null;
 
 		// `resolve` processes paths from right to left, prepending them until an

@@ -175,6 +175,7 @@ export type PluginImpl<O extends object = object> = (options?: O) => Plugin;
 export interface Plugin {
 	name: string;
 	cacheKey?: string;
+	// 1、当 getInputOptions 时调用
 	options?: (options: InputOptions) => InputOptions | void | null;
 	load?: LoadHook;
 	resolveId?: ResolveIdHook;
